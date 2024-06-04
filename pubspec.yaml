@@ -1,7 +1,7 @@
 name: screen_privacy
-description: "A new Flutter project."
+description: "Safeguard sensitive app content on both Android and iOS devices"
 version: 0.0.1
-homepage:
+homepage: https://github.com/Tukhtamurodov-Sardorbek/screen_privacy
 
 environment:
   sdk: '>=3.3.4 <4.0.0'
