@@ -33,7 +33,7 @@ And then you can simply call functions of ScreenPrivacy class instance anywhere
 
 
 ## Use Case with AutoRoute
-### This example demonstrates how to use the ScreenPrivacy plugin within an AutoRoute-based application to selectively disable screenshotting and/or hide app content in the recent apps preview for a specific page.
+This example demonstrates how to use the ScreenPrivacy plugin within an AutoRoute-based application to selectively disable screenshotting and/or hide app content in the recent apps preview for a specific page.
 
 ```dart
 import 'dart:io';
