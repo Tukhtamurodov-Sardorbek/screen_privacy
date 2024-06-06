@@ -33,7 +33,8 @@ And then you can simply call functions of ScreenPrivacy class instance anywhere
 
 
 ## Use Case with AutoRoute
-This example demonstrates how to use the ScreenPrivacy plugin within an AutoRoute-based application to selectively disable screenshotting and/or hide app content in the recent apps preview for a specific page.
+
+This example showcases the utilization of the ScreenPrivacy plugin within an AutoRoute-based application, constructed with AutoTabsScaffold and BottomNavigationBar. It enables the selective prevention of screenshotting and concealment of app content in the recent apps preview specifically for a designated page. The functionality is limited to a single page, toggling between disabling/enabling screenshotting and hiding/revealing content in the recent apps preview. Note that once the page is navigated away from or a different tab route is accessed, this feature will cease to operate.
 
 ```dart
 import 'dart:io';
@@ -48,7 +49,7 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
   bool _isNavigatedToDifferentTabRoute = false;
   bool _isIOSLifecycleUnblockedScreenshot = false;
   late final String _routeName;
-  late final WindowManagerCubit _windowManager;
+  late final ScreenPrivacy _screenPrivacy;
 
   bool blockScreenshot();
 
@@ -57,7 +58,7 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-
+    _screenPrivacy = ScreenPrivacy();
     _listener = Platform.isIOS && enablePrivacyScreen()
             ? AppLifecycleListener(onStateChange: _onLifecycleChanged)
             : null;
@@ -67,19 +68,18 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
 
   void _initializer(Duration timeStamp) {
     _routeName = context.router.current.name;
-    _windowManager = context.read<WindowManagerCubit>();
     final shouldListenNavigation =
             blockScreenshot() || (Platform.isAndroid && enablePrivacyScreen());
 
     if (Platform.isAndroid) {
       if (enablePrivacyScreen()) {
-        _windowManager.enablePrivacyScreen();
+        _screenPrivacy.enablePrivacyScreen();
       } else if (blockScreenshot()) {
-        _windowManager.blockScreenShot();
+        _screenPrivacy.disableScreenshot();
       }
     } else if (Platform.isIOS) {
       if (blockScreenshot()) {
-        _windowManager.blockScreenShot();
+        _screenPrivacy.disableScreenshot();
       }
     }
     _watcher = shouldListenNavigation == false
@@ -89,12 +89,12 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
         _navigationListener = () {
           if (context.tabsRouter.topRoute.name == _routeName) {
             if (_isNavigatedToDifferentTabRoute) {
-              _windowManager.blockScreenShot();
+              _screenPrivacy.disableScreenshot();
               _isNavigatedToDifferentTabRoute = false;
             }
           } else {
             if (!_isNavigatedToDifferentTabRoute) {
-              _windowManager.unblockScreenShot();
+              _screenPrivacy.enableScreenshot();
               _isNavigatedToDifferentTabRoute = true;
             }
           }
@@ -105,19 +105,19 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
   void _onLifecycleChanged(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        _windowManager.disablePrivacyScreen();
+        _screenPrivacy.disablePrivacyScreen();
         if (_isIOSLifecycleUnblockedScreenshot) {
-          _windowManager.blockScreenShot();
+          _screenPrivacy.disableScreenshot();
           _isIOSLifecycleUnblockedScreenshot = false;
         }
         break;
       case AppLifecycleState.inactive:
         if (context.tabsRouter.topRoute.name == _routeName) {
           if (blockScreenshot()) {
-            _windowManager.unblockScreenShot();
+            _screenPrivacy.enableScreenshot();
             _isIOSLifecycleUnblockedScreenshot = true;
           }
-          _windowManager.enablePrivacyScreen();
+          _screenPrivacy.enablePrivacyScreen();
         }
         break;
       case AppLifecycleState.paused:
@@ -131,13 +131,13 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
   void dispose() {
     if (Platform.isAndroid) {
       if (enablePrivacyScreen()) {
-        _windowManager.disablePrivacyScreen();
+        _screenPrivacy.disablePrivacyScreen();
       } else if (blockScreenshot()) {
-        _windowManager.unblockScreenShot();
+        _screenPrivacy.enableScreenshot();
       }
     } else if (Platform.isIOS) {
       if (blockScreenshot()) {
-        _windowManager.unblockScreenShot();
+        _screenPrivacy.enableScreenshot();
       }
     }
 
@@ -158,14 +158,14 @@ import '../screen_privacy_helper.dart';
 import '../../../../navigation/navigation.dart';
 
 @RoutePage()
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class SensitiveDataPage extends StatefulWidget {
+  const SensitiveDataPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<SensitiveDataPage> createState() => _SensitiveDataPageState();
 }
 
-class _HomePageState extends State<HomePage> with ScreenPrivacyMixin<HomePage> {
+class _SensitiveDataPageState extends State<SensitiveDataPage> with ScreenPrivacyMixin<SensitiveDataPage> {
   @override
   bool blockScreenshot() {
     return true;
@@ -192,3 +192,126 @@ class _HomePageState extends State<HomePage> with ScreenPrivacyMixin<HomePage> {
 }
 ```
 
+
+The following example shows how to use the ScreenPrivacy plugin in an AutoRoute-based application, utilizing AutoTabsScaffold and BottomNavigationBar, to disable screenshotting and/or conceal app content in the recent apps preview for the entire application.
+
+```dart
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:screen_privacy/screen_privacy.dart';
+
+mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
+  AppLifecycleListener? _listener;
+  late final ScreenPrivacy _screenPrivacy;
+  bool _isIOSLifecycleUnblockedScreenshot = false;
+
+  bool blockScreenshot();
+
+  bool enablePrivacyScreen();
+
+  @override
+  void initState() {
+    super.initState();
+    _screenPrivacy = ScreenPrivacy();
+    _listener = Platform.isIOS && enablePrivacyScreen()
+            ? AppLifecycleListener(onStateChange: _onLifecycleChanged)
+            : null;
+
+    WidgetsBinding.instance.addPostFrameCallback(_initializer);
+  }
+
+  void _initializer(Duration timeStamp) {
+    if (Platform.isAndroid) {
+      if (enablePrivacyScreen()) {
+        _screenPrivacy.enablePrivacyScreen();
+      } else if (blockScreenshot()) {
+        _screenPrivacy.disableScreenshot();
+      }
+    } else if (Platform.isIOS) {
+      if (blockScreenshot()) {
+        _screenPrivacy.disableScreenshot();
+      }
+    }
+  }
+
+  void _onLifecycleChanged(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _screenPrivacy.disablePrivacyScreen();
+        if (_isIOSLifecycleUnblockedScreenshot) {
+          _screenPrivacy.disableScreenshot();
+          _isIOSLifecycleUnblockedScreenshot = false;
+        }
+        break;
+      case AppLifecycleState.inactive:
+        if (blockScreenshot()) {
+          _screenPrivacy.enableScreenshot();
+          _isIOSLifecycleUnblockedScreenshot = true;
+        }
+        _screenPrivacy.enablePrivacyScreen();
+
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (Platform.isAndroid) {
+      if (enablePrivacyScreen()) {
+        _screenPrivacy.disablePrivacyScreen();
+      } else if (blockScreenshot()) {
+        _screenPrivacy.enableScreenshot();
+      }
+    } else if (Platform.isIOS) {
+      if (blockScreenshot()) {
+        _screenPrivacy.enableScreenshot();
+      }
+    }
+
+    _listener?.dispose();
+    super.dispose();
+  }
+}
+```
+
+```dart
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import '../screen_privacy_helper.dart';
+
+@RoutePage()
+class MyApp extends AutoRouter {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with ScreenPrivacyMixin {
+  @override
+  bool blockScreenshot() {
+    return true;
+  }
+
+  @override
+  bool enablePrivacyScreen() {
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AutoTabsScaffold(
+      homeIndex: 0,
+      routes: const [],
+      restorationId: 'AutoTabsScaffold',
+      bottomNavigationBuilder: (context, tabsRouter) {
+        return BottomNavigationBar(items: const []);
+      },
+    );
+  }
+}
+```
