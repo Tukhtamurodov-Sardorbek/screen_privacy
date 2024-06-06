@@ -38,12 +38,17 @@ This example demonstrates how to use the ScreenPrivacy plugin within an AutoRout
 ```dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:screen_privacy/screen_privacy.dart';
 
 mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
+  TabsRouter? _watcher;
   AppLifecycleListener? _listener;
-  late final ScreenPrivacy _screenPrivacy;
+  VoidCallback? _navigationListener;
+  bool _isNavigatedToDifferentTabRoute = false;
   bool _isIOSLifecycleUnblockedScreenshot = false;
+  late final String _routeName;
+  late final WindowManagerCubit _windowManager;
 
   bool blockScreenshot();
 
@@ -52,44 +57,68 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-    _screenPrivacy = ScreenPrivacy();
+
     _listener = Platform.isIOS && enablePrivacyScreen()
-            ? AppLifecycleListener(onStateChange: _onLifecycleChanged)
-            : null;
+        ? AppLifecycleListener(onStateChange: _onLifecycleChanged)
+        : null;
 
     WidgetsBinding.instance.addPostFrameCallback(_initializer);
   }
 
   void _initializer(Duration timeStamp) {
+    _routeName = context.router.current.name;
+    _windowManager = context.read<WindowManagerCubit>();
+    final shouldListenNavigation =
+        blockScreenshot() || (Platform.isAndroid && enablePrivacyScreen());
+
     if (Platform.isAndroid) {
       if (enablePrivacyScreen()) {
-        _screenPrivacy.enablePrivacyScreen();
+        _windowManager.enablePrivacyScreen();
       } else if (blockScreenshot()) {
-        _screenPrivacy.disableScreenshot();
+        _windowManager.blockScreenShot();
       }
     } else if (Platform.isIOS) {
       if (blockScreenshot()) {
-        _screenPrivacy.disableScreenshot();
+        _windowManager.blockScreenShot();
       }
     }
+    _watcher = shouldListenNavigation == false
+        ? null
+        : (context.watchTabsRouter
+          ..addListener(
+            _navigationListener = () {
+              if (context.tabsRouter.topRoute.name == _routeName) {
+                if (_isNavigatedToDifferentTabRoute) {
+                  _windowManager.blockScreenShot();
+                  _isNavigatedToDifferentTabRoute = false;
+                }
+              } else {
+                if (!_isNavigatedToDifferentTabRoute) {
+                  _windowManager.unblockScreenShot();
+                  _isNavigatedToDifferentTabRoute = true;
+                }
+              }
+            },
+          ));
   }
 
   void _onLifecycleChanged(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        _screenPrivacy.disablePrivacyScreen();
+        _windowManager.disablePrivacyScreen();
         if (_isIOSLifecycleUnblockedScreenshot) {
-          _screenPrivacy.disableScreenshot();
+          _windowManager.blockScreenShot();
           _isIOSLifecycleUnblockedScreenshot = false;
         }
         break;
       case AppLifecycleState.inactive:
-        if (blockScreenshot()) {
-          _screenPrivacy.enableScreenshot();
-          _isIOSLifecycleUnblockedScreenshot = true;
+        if (context.tabsRouter.topRoute.name == _routeName) {
+          if (blockScreenshot()) {
+            _windowManager.unblockScreenShot();
+            _isIOSLifecycleUnblockedScreenshot = true;
+          }
+          _windowManager.enablePrivacyScreen();
         }
-        _screenPrivacy.enablePrivacyScreen();
-
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -102,16 +131,20 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
   void dispose() {
     if (Platform.isAndroid) {
       if (enablePrivacyScreen()) {
-        _screenPrivacy.disablePrivacyScreen();
+        _windowManager.disablePrivacyScreen();
       } else if (blockScreenshot()) {
-        _screenPrivacy.enableScreenshot();
+        _windowManager.unblockScreenShot();
       }
     } else if (Platform.isIOS) {
       if (blockScreenshot()) {
-        _screenPrivacy.enableScreenshot();
+        _windowManager.unblockScreenShot();
       }
     }
 
+    final kNavigationListener = _navigationListener;
+    if (kNavigationListener != null) {
+      _watcher?.removeListener(mNavigationListener);
+    }
     _listener?.dispose();
     super.dispose();
   }
