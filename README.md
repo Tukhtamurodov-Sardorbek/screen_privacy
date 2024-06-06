@@ -59,8 +59,8 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
     super.initState();
 
     _listener = Platform.isIOS && enablePrivacyScreen()
-        ? AppLifecycleListener(onStateChange: _onLifecycleChanged)
-        : null;
+            ? AppLifecycleListener(onStateChange: _onLifecycleChanged)
+            : null;
 
     WidgetsBinding.instance.addPostFrameCallback(_initializer);
   }
@@ -69,7 +69,7 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
     _routeName = context.router.current.name;
     _windowManager = context.read<WindowManagerCubit>();
     final shouldListenNavigation =
-        blockScreenshot() || (Platform.isAndroid && enablePrivacyScreen());
+            blockScreenshot() || (Platform.isAndroid && enablePrivacyScreen());
 
     if (Platform.isAndroid) {
       if (enablePrivacyScreen()) {
@@ -83,23 +83,23 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
       }
     }
     _watcher = shouldListenNavigation == false
-        ? null
-        : (context.watchTabsRouter
-          ..addListener(
-            _navigationListener = () {
-              if (context.tabsRouter.topRoute.name == _routeName) {
-                if (_isNavigatedToDifferentTabRoute) {
-                  _windowManager.blockScreenShot();
-                  _isNavigatedToDifferentTabRoute = false;
-                }
-              } else {
-                if (!_isNavigatedToDifferentTabRoute) {
-                  _windowManager.unblockScreenShot();
-                  _isNavigatedToDifferentTabRoute = true;
-                }
-              }
-            },
-          ));
+            ? null
+            : (context.watchTabsRouter
+      ..addListener(
+        _navigationListener = () {
+          if (context.tabsRouter.topRoute.name == _routeName) {
+            if (_isNavigatedToDifferentTabRoute) {
+              _windowManager.blockScreenShot();
+              _isNavigatedToDifferentTabRoute = false;
+            }
+          } else {
+            if (!_isNavigatedToDifferentTabRoute) {
+              _windowManager.unblockScreenShot();
+              _isNavigatedToDifferentTabRoute = true;
+            }
+          }
+        },
+      ));
   }
 
   void _onLifecycleChanged(AppLifecycleState state) {
@@ -141,8 +141,8 @@ mixin ScreenPrivacyMixin<T extends StatefulWidget> on State<T> {
       }
     }
 
-    final kNavigationListener = _navigationListener;
-    if (kNavigationListener != null) {
+    final mNavigationListener = _navigationListener;
+    if (mNavigationListener != null) {
       _watcher?.removeListener(mNavigationListener);
     }
     _listener?.dispose();
