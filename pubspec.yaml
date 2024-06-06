@@ -1,6 +1,6 @@
 name: screen_privacy
 description: "Safeguard sensitive app content on both Android and iOS devices"
-version: 0.0.2
+version: 0.0.2+1
 homepage: https://github.com/Tukhtamurodov-Sardorbek/screen_privacy
 
 environment:
