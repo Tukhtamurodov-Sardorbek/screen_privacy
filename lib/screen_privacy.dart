@@ -1,11 +1,11 @@
 import 'screen_privacy_platform_interface.dart';
 
 class ScreenPrivacy {
-  Future<void> disableScreenshot() {
+  Future<bool> disableScreenshot() {
     return ScreenPrivacyPlatform.instance.disableScreenshot();
   }
 
-  Future<void> enableScreenshot() {
+  Future<bool> enableScreenshot() {
     return ScreenPrivacyPlatform.instance.enableScreenshot();
   }
 
@@ -17,11 +17,11 @@ class ScreenPrivacy {
     return ScreenPrivacyPlatform.instance.tryToCaptureScreen();
   }
 
-  Future<void> enablePrivacyScreen() {
+  Future<bool> enablePrivacyScreen() {
     return ScreenPrivacyPlatform.instance.enablePrivacyScreen();
   }
 
-  Future<void> disablePrivacyScreen() {
+  Future<bool> disablePrivacyScreen() {
     return ScreenPrivacyPlatform.instance.disablePrivacyScreen();
   }
 }

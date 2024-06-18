@@ -5,7 +5,7 @@ import 'package:screen_privacy/screen_privacy_method_channel.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelScreenPrivacy platform = MethodChannelScreenPrivacy();
+  // MethodChannelScreenPrivacy platform = MethodChannelScreenPrivacy();
   const MethodChannel channel = MethodChannel('screen_privacy');
 
   setUp(() {

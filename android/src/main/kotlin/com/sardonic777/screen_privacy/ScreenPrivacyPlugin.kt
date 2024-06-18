@@ -30,12 +30,12 @@ class ScreenPrivacyPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         when (call.method) {
             "enableScreenshot" -> {
                 val isFlagRemoved = removeSecureFlag()
-                result.success("Method channel call [enableScreenshot] | isFlagRemoved = $isFlagRemoved")
+                result.success(isFlagRemoved)
             }
 
             "disableScreenshot" -> {
                 val isFlagSet = setSecureFlag()
-                result.success("Method channel call [disableScreenshot] | isFlagSet = $isFlagSet")
+                result.success(isFlagSet)
             }
 
             "isScreenshotDisabled" -> {
@@ -44,12 +44,12 @@ class ScreenPrivacyPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "enablePrivacyScreen" -> {
                 val isFlagSet = setSecureFlag()
-                result.success("Method channel call [enablePrivacyScreen] | isFlagSet = $isFlagSet")
+                result.success(isFlagSet)
             }
 
             "disablePrivacyScreen" -> {
                 val isFlagRemoved = removeSecureFlag()
-                result.success("Method channel call [disablePrivacyScreen] | isFlagRemoved = $isFlagRemoved")
+                result.success(isFlagRemoved)
             }
 
             else -> {

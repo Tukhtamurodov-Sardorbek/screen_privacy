@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:screen_privacy/screen_privacy.dart';
 import 'package:screen_privacy/screen_privacy_platform_interface.dart';
 import 'package:screen_privacy/screen_privacy_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -8,39 +7,33 @@ class MockScreenPrivacyPlatform
     with MockPlatformInterfaceMixin
     implements ScreenPrivacyPlatform {
   @override
-  Future<void> disablePrivacyScreen() {
-    // TODO: implement disablePrivacyScreen
-    throw UnimplementedError();
+  Future<bool> disablePrivacyScreen() async {
+    return true;
   }
 
   @override
-  Future<void> disableScreenshot() {
-    // TODO: implement disableScreenshot
-    throw UnimplementedError();
+  Future<bool> disableScreenshot() async {
+    return true;
   }
 
   @override
-  Future<void> enablePrivacyScreen() {
-    // TODO: implement enablePrivacyScreen
-    throw UnimplementedError();
+  Future<bool> enablePrivacyScreen() async {
+    return true;
   }
 
   @override
-  Future<void> enableScreenshot() {
-    // TODO: implement enableScreenshot
-    throw UnimplementedError();
+  Future<bool> enableScreenshot() async {
+    return true;
   }
 
   @override
-  Future<bool> isScreenshotDisabled() {
-    // TODO: implement isScreenshotDisabled
-    throw UnimplementedError();
+  Future<bool> isScreenshotDisabled() async {
+    return true;
   }
 
   @override
-  Stream<bool> tryToCaptureScreen() {
-    // TODO: implement tryToCaptureScreen
-    throw UnimplementedError();
+  Stream<bool> tryToCaptureScreen() async* {
+    yield true;
   }
 }
 

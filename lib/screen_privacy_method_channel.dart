@@ -22,21 +22,21 @@ class MethodChannelScreenPrivacy extends ScreenPrivacyPlatform {
   }
 
   @override
-  Future<void> disableScreenshot() async {
-    final result = await methodChannel.invokeMethod<String>('disableScreenshot');
-    _debugPrint(result);
+  Future<bool> disableScreenshot() async {
+    final result = await methodChannel.invokeMethod<bool>('disableScreenshot');
+    return result ?? false;
   }
 
   @override
-  Future<void> enableScreenshot() async {
-    final result =
-        await methodChannel.invokeMethod<String>('enableScreenshot');
-    _debugPrint(result);
+  Future<bool> enableScreenshot() async {
+    final result = await methodChannel.invokeMethod<bool>('enableScreenshot');
+    return result ?? false;
   }
 
   @override
   Future<bool> isScreenshotDisabled() async {
-    final result = await methodChannel.invokeMethod<bool>('isScreenshotDisabled');
+    final result =
+        await methodChannel.invokeMethod<bool>('isScreenshotDisabled');
     return result ?? false;
   }
 
@@ -56,17 +56,17 @@ class MethodChannelScreenPrivacy extends ScreenPrivacyPlatform {
   }
 
   @override
-  Future<void> enablePrivacyScreen() async {
+  Future<bool> enablePrivacyScreen() async {
     final result =
-        await methodChannel.invokeMethod<String>('enablePrivacyScreen');
-    _debugPrint(result);
+        await methodChannel.invokeMethod<bool>('enablePrivacyScreen');
+    return result ?? false;
   }
 
   @override
-  Future<void> disablePrivacyScreen() async {
+  Future<bool> disablePrivacyScreen() async {
     final result =
-        await methodChannel.invokeMethod<String>('disablePrivacyScreen');
-    _debugPrint(result);
+        await methodChannel.invokeMethod<bool>('disablePrivacyScreen');
+    return result ?? false;
   }
 }
 

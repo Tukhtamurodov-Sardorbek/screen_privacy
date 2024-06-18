@@ -23,13 +23,13 @@ abstract class ScreenPrivacyPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> disableScreenshot();
+  Future<bool> disableScreenshot();
 
-  Future<void> enableScreenshot();
+  Future<bool> enableScreenshot();
 
-  Future<void> enablePrivacyScreen();
+  Future<bool> enablePrivacyScreen();
 
-  Future<void> disablePrivacyScreen();
+  Future<bool> disablePrivacyScreen();
 
   Future<bool> isScreenshotDisabled();
 
